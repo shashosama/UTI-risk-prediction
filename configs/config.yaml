@@ -1,0 +1,8 @@
+model: RandomForest
+params:
+  RandomForest:
+    n_estimators: 100
+    max_depth: 5
+  XGBoost:
+    n_estimators: 100
+    max_depth: 5
