@@ -1,4 +1,4 @@
-#  UTI Risk Prediction in R
+#  UTI Risk Prediction 
 
 This project builds a machine learning model in **R** to predict the risk of **urinary tract infection (UTI)** using patient symptoms and temperature. The goal is to help identify patients at high risk of UTI-related conditions, such as **inflammation of the urinary bladder** and **nephritis of renal pelvis origin**, using interpretable models.
 
