@@ -5,7 +5,7 @@ import joblib
 st.title("UTI Risk Chatbot")
 
 # Load model once
-model = joblib.load("model/uti_model.pkl")
+model = joblib.load("uti_model.pkl")
 
 # Input box
 user_input = st.text_input("Describe your symptoms:")
