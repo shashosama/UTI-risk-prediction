@@ -18,3 +18,14 @@ df = pd.DataFrame(data)
 if st.button("Predict"):
     prob = model.predict_proba(df)[0][1]
     st.success(f"Predicted UTI Risk: {prob:.2%}")
+
+uploaded_file = st.file_uploader("Upload CSV")
+if uploaded_file:
+    input_df = pd.read_csv(uploaded_file)
+    prob = model.predict_proba(input_df)[:,1]
+    input_df['UTI Risk'] = prob
+    st.dataframe(input_df)
+    input_df.to_csv("predictions.csv", index=False)
+    st.download_button("Download Predictions", "predictions.csv")
+    st.pyplot(shap.summary_plot(shap_values[1], input_df, show=False))
+
