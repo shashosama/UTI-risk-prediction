@@ -25,8 +25,17 @@ def train_and_save(X_train, y_train):
 if __name__ == "__main__":
     # Example: load from real or synthetic data
     df = pd.read_csv("data/uti_real_data.csv")
-    X = df.drop("uti_diagnosis", axis=1)
-    y = df["uti_diagnosis"]
+    print("Columns:", df.columns.tolist())
+    print(df.head())
+    print("Unique target values before replace:", df["Nephritis of renal pelvis origin"].unique())
+
+    df = df.replace({'yes': 1, 'no': 0})
+
+    X = df.drop("Nephritis of renal pelvis origin", axis=1)
+    y = df["Nephritis of renal pelvis origin"].map({"no": 0, "yes": 1})
+    print("Any NaNs in y?", df["Nephritis of renal pelvis origin"].isna().sum())
+    df = df.dropna(subset=["Nephritis of renal pelvis origin"])
+
     X_train, _, y_train, _ = train_test_split(X, y, test_size=0.2, random_state=42)
 
     train_and_save(X_train, y_train)
