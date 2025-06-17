@@ -1,3 +1,7 @@
+import pandas as pd
+import preprocess
+
+
 def test_symptom_score():
     df = pd.DataFrame({
         "Occurrence of nausea": [True, False],

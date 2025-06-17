@@ -1,3 +1,4 @@
+import shap
 import streamlit as st
 import joblib
 import pandas as pd
@@ -8,6 +9,7 @@ st.title("UTI Risk Predictor")
 age = st.slider("Age", 0, 100)
 symptom_score = st.slider("Symptom Score (0-5)", 0, 5)
 age_group = st.selectbox("Age Group", ["adult", "senior"])
+
 data = {
     "age": [age],
     "symptom_score": [symptom_score],
@@ -15,6 +17,7 @@ data = {
 }
 
 df = pd.DataFrame(data)
+
 if st.button("Predict"):
     prob = model.predict_proba(df)[0][1]
     st.success(f"Predicted UTI Risk: {prob:.2%}")
@@ -22,10 +25,17 @@ if st.button("Predict"):
 uploaded_file = st.file_uploader("Upload CSV")
 if uploaded_file:
     input_df = pd.read_csv(uploaded_file)
-    prob = model.predict_proba(input_df)[:,1]
+    prob = model.predict_proba(input_df)[:, 1]
     input_df['UTI Risk'] = prob
     st.dataframe(input_df)
+
+    # SHAP explainability
+    explainer = shap.Explainer(model, input_df)
+    shap_values = explainer(input_df)
+
+    st.set_option('deprecation.showPyplotGlobalUse', False)
+    st.pyplot(shap.summary_plot(shap_values, input_df, show=False))
+
+    # Download button
     input_df.to_csv("predictions.csv", index=False)
     st.download_button("Download Predictions", "predictions.csv")
-    st.pyplot(shap.summary_plot(shap_values[1], input_df, show=False))
-
