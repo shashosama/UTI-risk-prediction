@@ -7,6 +7,8 @@ import xgboost as xgb
 from sklearn.ensemble import RandomForestClassifier
 import yaml
 import mlflow
+import run_chatbot
+import auc_score
 X, y = make_classification(n_samples=1000, n_features=6, weights=[0.7, 0.3],
                            n_informative=4, n_redundant=1, random_state=42)
 df = pd.DataFrame(X, columns=["age", "fever", "pain", "frequency", "nausea", "burning"])
@@ -29,3 +31,7 @@ with open("configs/config.yaml") as f:
 mlflow.start_run()
 mlflow.log_metric("roc_auc", auc_score)
 mlflow.end_run()
+
+
+if __name__ == "__main__":
+    run_chatbot()

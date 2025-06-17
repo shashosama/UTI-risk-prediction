@@ -28,6 +28,6 @@ if user_input:
 
     st.write(f"Predicted UTI risk: {prob:.2%}")
     if prob > 0.5:
-        st.warning("⚠️ High risk of UTI. Please consult a doctor.")
+        st.warning(" High risk of UTI. Please consult a doctor.")
     else:
-        st.success("✅ Low risk of UTI.")
+        st.success("Low risk of UTI.")
