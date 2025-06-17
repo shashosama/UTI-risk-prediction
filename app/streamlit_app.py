@@ -3,9 +3,10 @@ import streamlit as st
 import joblib
 import pandas as pd
 
-model = joblib.load("model.joblib")
+model = joblib.load("model/uti_model.pkl")  # Adjust path to your model
 
 st.title("UTI Risk Predictor")
+
 age = st.slider("Age", 0, 100)
 symptom_score = st.slider("Symptom Score (0-5)", 0, 5)
 age_group = st.selectbox("Age Group", ["adult", "senior"])
@@ -22,7 +23,14 @@ if st.button("Predict"):
     prob = model.predict_proba(df)[0][1]
     st.success(f"Predicted UTI Risk: {prob:.2%}")
 
+    # SHAP for individual input
+    explainer = shap.Explainer(model.named_steps["randomforestclassifier"])
+    shap_values = explainer(df)
+    st.set_option('deprecation.showPyplotGlobalUse', False)
+    st.pyplot(shap.waterfall_plot(shap_values[0], show=False))
+
 uploaded_file = st.file_uploader("Upload CSV")
+
 if uploaded_file:
     input_df = pd.read_csv(uploaded_file)
     prob = model.predict_proba(input_df)[:, 1]
@@ -30,12 +38,11 @@ if uploaded_file:
     st.dataframe(input_df)
 
     # SHAP explainability
-    explainer = shap.Explainer(model, input_df)
+    explainer = shap.Explainer(model.named_steps["randomforestclassifier"])
     shap_values = explainer(input_df)
-
     st.set_option('deprecation.showPyplotGlobalUse', False)
     st.pyplot(shap.summary_plot(shap_values, input_df, show=False))
 
-    # Download button
-    input_df.to_csv("predictions.csv", index=False)
-    st.download_button("Download Predictions", "predictions.csv")
+    # Download button (in-memory)
+    csv = input_df.to_csv(index=False)
+    st.download_button("Download Predictions", csv, file_name="predictions.csv", mime="text/csv")
