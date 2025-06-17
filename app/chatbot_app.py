@@ -4,23 +4,23 @@ import joblib
 
 st.title("UTI Risk Chatbot")
 
-# Load model once
-model = joblib.load("uti_model.pkl")
+# Load model
+model = joblib.load("model/uti_model.pkl")
 
-# Input box
 user_input = st.text_input("Describe your symptoms:")
 
 def extract_features(text):
+    text = text.lower()
     features = {
-        "fever": int("fever" in text.lower()),
-        "burning": int("burning" in text.lower()),
-        "pain": int("pain" in text.lower()),
-        "urgency": int("urgency" in text.lower()),
-        # Add more as needed
+        "fever": int("fever" in text),
+        "burning": int("burning" in text),
+        "pain": int("pain" in text or "ache" in text),
+        "urgency": int("urgency" in text or "frequent urination" in text),
+        # Add more features
     }
     return features
 
-if user_input:
+if user_input.strip():
     features = extract_features(user_input)
     df = pd.DataFrame([features])
 
@@ -28,6 +28,8 @@ if user_input:
 
     st.write(f"Predicted UTI risk: {prob:.2%}")
     if prob > 0.5:
-        st.warning(" High risk of UTI. Please consult a doctor.")
+        st.warning("High risk of UTI. Please consult a doctor.")
     else:
-        st.success("Low risk of UTI.")
+        st.success(" Low risk of UTI.")
+else:
+    st.info("Please describe your symptoms above.")
