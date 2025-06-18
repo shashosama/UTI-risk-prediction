@@ -20,22 +20,60 @@ def train_and_save(X_train, y_train):
 
     os.makedirs("model", exist_ok=True)
     joblib.dump(model, "model/uti_model.pkl")
-    print(" Model trained and saved to model/uti_model.pkl")
+    print("Model trained and saved to model/uti_model.pkl")
 
 if __name__ == "__main__":
-    # Example: load from real or synthetic data
     df = pd.read_csv("data/uti_real_data.csv")
-    print("Columns:", df.columns.tolist())
-    print(df.head())
-    print("Unique target values before replace:", df["Nephritis of renal pelvis origin"].unique())
 
-    df = df.replace({'yes': 1, 'no': 0})
+    # Clean target
+    df["Inflammation of urinary bladder"] = (
+        df["Inflammation of urinary bladder"]
+        .astype(str)
+        .str.strip()
+        .str.lower()
+        .replace({"yes": 1, "no": 0})
+    )
+    df["Inflammation of urinary bladder"] = pd.to_numeric(df["Inflammation of urinary bladder"], errors="coerce")
+    df = df.dropna(subset=["Inflammation of urinary bladder"])
 
-    X = df.drop("Nephritis of renal pelvis origin", axis=1)
-    y = df["Nephritis of renal pelvis origin"].map({"no": 0, "yes": 1})
-    print("Any NaNs in y?", df["Nephritis of renal pelvis origin"].isna().sum())
-    df = df.dropna(subset=["Nephritis of renal pelvis origin"])
+    # Define bool_cols
+    bool_cols = [
+        "Occurrence of nausea",
+        "Lumbar pain",
+        "Urine pushing (continuous need for urination)",
+        "Micturition pains",
+        "Burning of urethra, itch, swelling of urethra outlet"
+    ]
 
+    # Clean symptom columns
+    for col in bool_cols:
+        df[col] = (
+            df[col]
+            .astype(str)
+            .str.strip()
+            .str.lower()
+            .replace({"yes": 1, "no": 0, "true": 1, "false": 0})
+        )
+
+    # Convert all to numeric at once
+    df[bool_cols] = df[bool_cols].apply(pd.to_numeric, errors="coerce")
+    print("Any NaNs in bool_cols:\n", df[bool_cols].isna().sum())
+
+    # Drop rows where symptom columns couldn't convert
+    df = df.dropna(subset=bool_cols)
+
+    # Create symptom_score
+    df["symptom_score"] = df[bool_cols].sum(axis=1)
+
+    # Create X and y
+    X = df[["Temperature of patient", "symptom_score"]]
+    y = df["Inflammation of urinary bladder"].astype(int)
+
+    # Debug print to see final shape
+    print(f"Final X shape: {X.shape}, Final y length: {len(y)}")
+
+    # Split
     X_train, _, y_train, _ = train_test_split(X, y, test_size=0.2, random_state=42)
 
+    # Train + save
     train_and_save(X_train, y_train)
