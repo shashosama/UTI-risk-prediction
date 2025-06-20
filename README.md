@@ -2,6 +2,12 @@
 
 This project builds a machine learning model to predict the risk of **urinary tract infection (UTI)** using patient symptoms and temperature. The goal is to help identify patients at high risk of UTI-related conditions, such as **inflammation of the urinary bladder** and **nephritis of renal pelvis origin**, using interpretable models.
 
+
+This project builds a **machine learning model** to predict the risk of **urinary tract infection (UTI)** based on patient symptoms and temperature.  
+It provides **two app interfaces**:  
+A standard form-based predictor  
+ A chatbot-style predictor  
+
 ---
 
 ##  Dataset
