@@ -12,12 +12,13 @@ def load_data(filepath=None):
 
     # Convert yes/no to 1/0
     bool_cols = [
-        'Occurrence of nausea',
-        'Lumbar pain',
-        'Urine pushing',   
-        'Micturition pains',
-        'Burning of urethra, itch, swelling of urethra outlet'
+    'Occurrence of nausea',
+    'Lumbar pain',
+    'Urine pushing (continuous need for urination)',
+    'Micturition pains',
+    'Burning of urethra, itch, swelling of urethra outlet'
     ]
+
     for col in bool_cols:
         df[col] = df[col].map({'yes': 1, 'no': 0})
 
