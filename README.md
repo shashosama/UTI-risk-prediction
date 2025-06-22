@@ -1,91 +1,72 @@
-#  UTI Risk Prediction 
-
-This project builds a machine learning model to predict the risk of **urinary tract infection (UTI)** using patient symptoms and temperature. The goal is to help identify patients at high risk of UTI-related conditions, such as **inflammation of the urinary bladder** and **nephritis of renal pelvis origin**, using interpretable models.
+# UTI Risk Prediction  
 
 
 This project builds a **machine learning model** to predict the risk of **urinary tract infection (UTI)** based on patient symptoms and temperature.  
-It provides **two app interfaces**:  
-A standard form-based predictor  
- A chatbot-style predictor  
+It provides two interactive app interfaces:
+-  A standard **form-based Streamlit app**
+-  A **chatbot-style Streamlit app**  
+
+The goal is to support early detection of UTI-related conditions, such as:
+- **Inflammation of the urinary bladder** (main target)
+- **Nephritis of renal pelvis origin** (optional target for future extension)
 
 ---
+# General Problem
+# UTIs are common and can cause serious issues (e.g., inflammation of urinary bladder, nephritis of renal pelvis origin)
+# Symptoms are subjective, vary across patients, and fast, data-driven assessments are lacking.
 
-##  Dataset
+# Solution: Machine learning model in R to predict UTI risk based on symptoms and temperature.
 
-The dataset includes **120 patient records** with features such as:
-- `Temperature of patient` (numeric)
-- `Occurrence of nausea` (boolean)
-- `Lumbar pain` (boolean)
-- `Urine pushing (continuous need for urination)` (boolean)
-- `Micturition pains` (boolean)
-- `Burning of urethra, itch, swelling of urethra outlet` (boolean)
+##  Dataset  
+
+The dataset contains **120 patient records** with features:
+- `Temperature of patient` (numeric)  
+- `Occurrence of nausea` (yes/no)  
+- `Lumbar pain` (yes/no)  
+- `Urine pushing (continuous need for urination)` (yes/no)  
+- `Micturition pains` (yes/no)  
+- `Burning of urethra, itch, swelling of urethra outlet` (yes/no)  
 
 Targets:
-- `Inflammation of urinary bladder` (boolean, main target)
-- `Nephritis of renal pelvis origin` (boolean, optional target)
+- `Inflammation of urinary bladder` (yes/no)
+- `Nephritis of renal pelvis origin` (yes/no)
 
 ---
 
-## Features
- Data cleaning and feature engineering:
-- Converted boolean columns to numeric (0/1)
-- Created `symptom_score` = sum of key symptoms
+##  Features  
 
- Modeling:
-- Logistic regression, decision tree, and random forest models (with `caret` package)
-- ROC-AUC, confusion matrix, precision-recall metrics
+ **Data processing**
+- Converts yes/no symptom columns to numeric (0/1)
+- Creates `symptom_score` (sum of key symptom indicators)
 
- Model explainability:
-- Feature importance plots
-- Partial dependence plots
+ **Modeling**
+- Random Forest Classifier (with SMOTE for class balancing)
+- Trained on `Temperature of patient` + `symptom_score`
+- Metrics: confusion matrix, ROC-AUC, precision-recall
 
- Visualization:
-- ggplot2 and plotly for EDA and results
+ **Apps**
+- **Form App:** sliders for temperature + symptom score, displays risk level
+- **Chatbot App:** accepts typed symptom descriptions, extracts features, predicts risk
+
+**Planned Extensions**
+- SHAP explainability  
+- Visualizations (ROC curves, feature importance)  
+- Support for additional features (e.g., age, age group)
 
 ---
 
-##  How to Run
+##  How to Run  
 
-```r
-# Load required packages
-library(tidyverse)
-library(caret)
-library(pROC)
-library(ggplot2)
-library(plotly)
+### Locally  
 
-# Read dataset
-df <- read.csv("data/uti_real_data.csv")
+Run the form app:  
+```bash
+streamlit run app/streamlit_app.py
+streamlit run app/chatbot_app.py
 
-# Preprocess
-df <- df %>%
-  mutate(
-    Occurrence.of.nausea = as.integer(Occurrence.of.nausea),
-    Lumbar.pain = as.integer(Lumbar.pain),
-    Urine.pushing..continuous.need.for.urination. = as.integer(Urine.pushing..continuous.need.for.urination.),
-    Micturition.pains = as.integer(Micturition.pains),
-    Burning.of.urethra..itch..swelling.of.urethra.outlet = as.integer(Burning.of.urethra..itch..swelling.of.urethra.outlet),
-    Inflammation.of.urinary.bladder = as.factor(Inflammation.of.urinary.bladder)
-  ) %>%
-  mutate(symptom_score = Occurrence.of.nausea + Lumbar.pain +
-         Urine.pushing..continuous.need.for.urination. +
-         Micturition.pains +
-         Burning.of.urethra..itch..swelling.of.urethra.outlet)
-
-# Split
-set.seed(42)
-trainIndex <- createDataPartition(df$Inflammation.of.urinary.bladder, p = 0.8, list = FALSE)
-trainData <- df[trainIndex, ]
-testData <- df[-trainIndex, ]
-
-# Train model
-model <- train(Inflammation.of.urinary.bladder ~ Temperature.of.patient + symptom_score,
-               data = trainData, method = "glm", family = "binomial")
-
-# Predict + evaluate
-pred <- predict(model, testData)
-confusionMatrix(pred, testData$Inflammation.of.urinary.bladder)
-
-# ROC
-roc_obj <- roc(testData$Inflammation.of.urinary.bladder, as.numeric(pred))
-plot(roc_obj)
+#  What I have learned:
+#  Data preprocessing: cleaning categorical variables, creating symptom_score
+#  Model building: using caret for classification (RF, logistic regression, etc.)
+#  Performance evaluation: confusion matrix, ROC-AUC
+# Visualization: ROC curve with ggplot2 / plotly
+#  Reproducible ML workflow: clear data split, model train, eval, plot
